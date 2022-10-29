@@ -13,11 +13,6 @@
 
 void keyGeneration(void);
 
-typedef struct key{
-    mpz_t n;
-    mpz_t exponent;
-} key;
-
 int main(int argc, char const *argv[])
 {   
 
@@ -57,10 +52,6 @@ void keyGeneration(void){
 
     //Inverse modulo of (e, lamda(n))
     mpz_t d;
-
-    //Key pair
-    key publicKey;
-    key privateKey;
 
     //Files to store the keys
     FILE *file_public = fopen("public.key", "w+");
@@ -154,13 +145,17 @@ void keyGeneration(void){
     mpz_invert(d, e, lamda);
 
     //Now we have the public and private key (n, e) & (n, d) -> from wiki
-    
+    //Storing
+    size_t buf[2]; //8 bytes each
 
-    
+    mpz_export(buf, NULL, 1, sizeof(size_t), 0, 0, n);
+    mpz_export(buf+1, NULL, 1, sizeof(size_t), 0, 0, e);
 
+    fwrite(buf, sizeof(size_t), 2, file_public);
 
+    mpz_export(buf+1, NULL, 1, sizeof(size_t), 0, 0, d);
 
-
+    fwrite(buf, sizeof(size_t), 2, file_private);
 
     //Free space occupied
     fclose(file_private);
