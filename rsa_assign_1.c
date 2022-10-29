@@ -146,6 +146,8 @@ void keyGeneration(void){
 
     //Now we have the public and private key (n, e) & (n, d) -> from wiki
     //Storing
+
+    //We use a buf so that we can write a constant size
     size_t buf[2]; //8 bytes each
 
     mpz_export(buf, NULL, 1, sizeof(size_t), 0, 0, n);
