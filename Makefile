@@ -6,4 +6,4 @@ rsa_assign_1.o: rsa_assign_1.c
 	gcc -c rsa_assign_1.c -lm
 
 clean:
-	rm -f *.o ; rm -f *.txt ; rm -f rsa_assign_1 ; rm -f *.key
+	rm -f *.o rsa_assign_1 *.key

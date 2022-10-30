@@ -12,6 +12,7 @@
 #define rand_max 5000
 
 void keyGeneration(void);
+void encryptData(char *inputfile, char *keyfile, char *output);
 
 int main(int argc, char const *argv[])
 {   
@@ -20,13 +21,8 @@ int main(int argc, char const *argv[])
         keyGeneration();
     }
     else{
-        printf("Invalid selection!\n");
-        exit(1);
+        encryptData("plaintext.txt", "public.key", "ciphertext.txt");
     }
-
-
-
-
 
 
 
@@ -34,6 +30,101 @@ int main(int argc, char const *argv[])
     printf("Done!\n");
 
     return 0;
+}
+
+void encryptData(char *inputfile, char *keyfile, char *output){
+
+    //Import public key     
+    mpz_t public_n;
+    mpz_t public_e;
+
+    //Size of 8 bytes each
+    size_t keyBuffer[2]; 
+
+    //Open file for reading 
+    FILE *keyDir = fopen(keyfile, "r");
+
+    if(keyDir == NULL){
+        printf("File directory does not exist!\n");
+        exit(1); 
+    }
+
+    fread(&keyBuffer[0], sizeof(size_t), 1, keyDir);
+    fread(&keyBuffer[1], sizeof(size_t), 1, keyDir);
+
+    fclose(keyDir);
+
+    //File read finished, import to mpz_t variables
+    mpz_import(public_n, 1, 1, sizeof(size_t), 0, 0, &keyBuffer[0]);
+    mpz_import(public_e, 1, 1, sizeof(size_t), 0, 0, &keyBuffer[1]);
+
+    //We have successfully gained the public key from file!
+
+    //Encryption begins
+    //plaintext.txt
+    FILE *input = fopen(inputfile, "r");
+
+    //we need to know the lenght of the plaintext -> specifically the number of bytes
+    if(input == NULL){
+        printf("File directory does not exist!\n");
+        exit(1); 
+    }
+
+    //Seek the end of the file
+    fseek(input, 0, SEEK_END);
+    size_t len = ftell(input);
+    fseek(input, 0, SEEK_SET);
+
+    //Read each character from the file and store it the buffer
+    char bufferRead[len];
+    for(int j = 0; j < len; j++){
+        fread(&bufferRead[j], 1, 1, input);
+        // printf("%c\n", bufferRead[j]);
+    }
+
+    fclose(input);
+
+    printf("Lenght of file is %lu\n", len);
+
+    FILE *encrypted_file = fopen(output, "w+");
+    if(encrypted_file == NULL){
+        printf("File directory does not exist!\n");
+        exit(1); 
+    }
+
+    //Buffer that will contain the encrypted text
+    size_t ciphertext[len*sizeof(size_t)]; 
+    
+    int i = 0;
+    while(i < len){
+        
+        mpz_t temp_char; 
+        mpz_init(temp_char);
+        
+        //Import the 1 byte character into mpz_t variable
+        mpz_import(temp_char, 1, 1, sizeof(char), 0, 0, &bufferRead[i]);
+
+        mpz_t encrypted_var;
+        mpz_init(encrypted_var);
+        
+        //Perform the encryption
+        mpz_powm(encrypted_var, temp_char, public_e, public_n);
+
+        //Store the encrypted byte in ciphertext buffer
+        mpz_export(&ciphertext[i], NULL, 1, sizeof(size_t), 0, 0, encrypted_var);
+
+        //Write the encrypted text in file
+        fwrite(&ciphertext[i] + i, sizeof(size_t), 1, encrypted_file);
+
+        i++;
+
+        mpz_clears(temp_char, encrypted_var, NULL);
+
+    }
+
+    fclose(encrypted_file);
+    mpz_clears(public_e, public_n, NULL);
+    return;
 }
 
 void keyGeneration(void){
@@ -150,8 +241,11 @@ void keyGeneration(void){
     //We use a buf so that we can write a constant size
     size_t buf[2]; //8 bytes each
 
-    mpz_export(buf, NULL, 1, sizeof(size_t), 0, 0, n);
-    mpz_export(buf+1, NULL, 1, sizeof(size_t), 0, 0, e);
+    mpz_export(&buf[0], NULL, 1, sizeof(size_t), 0, 0, n);
+    mpz_export(&buf[1], NULL, 1, sizeof(size_t), 0, 0, e);
+
+    gmp_printf("Public n is %Zd\n", n);
+    gmp_printf("Public e is %Zd\n", e);
 
     fwrite(buf, sizeof(size_t), 2, file_public);
 
