@@ -4,8 +4,8 @@
 
 void keyGeneration(void);
 
-void encryptData(char *inputfile, char *keyfile, char *output);
+void encryptData(char const *inputfile, char const *keyfile, char const *output);
 
-void decryptData(char *inputfile, char *keyfile, char *output);
+void decryptData(char const *inputfile, char const *keyfile, char const *output);
 
 #endif

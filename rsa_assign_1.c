@@ -8,24 +8,67 @@
 #include <string.h>
 #include <time.h>
 #include <gmp.h>
+#include <getopt.h>
 #include "rsa_assign_1.h"
 
 #define rand_max 10000
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {   
-    keyGeneration();
+    char const *inputFile;
+    char const *keyFile;
+    char const *outputFile; 
+        
+    int option_val = 0;
+    while((option_val = getopt(argc, argv, "i:o:k:gdeh")) != -1){
+        
+        switch(option_val) {
+            case 'i':
+                inputFile = optarg;
+                break;
+            
+            case 'o':
+                outputFile = optarg;
+                break;
+            
+            case 'k':
+                keyFile = optarg;
+                break;
+            
+            case 'g':
+                if(argc > 2){
+                    printf("Invalid Arguments. Try again!\n");
+                    exit(1);
+                }
+                keyGeneration();
+                return 0;
 
-    encryptData("plaintext.txt", "public.key", "ciphertext.txt");
+            case 'd':
+                //total args when enc or dec
+                if(argc != 8){
+                    printf("Invalid Arguments. Try again!\n");
+                    exit(1);
+                }
+                decryptData(inputFile, keyFile, outputFile);
+                break;
+            
+            case 'e':
+                //total args when enc or dec
+                if(argc != 8){
+                    printf("Invalid Arguments. Try again!\n");
+                    exit(1);
+                }
+                encryptData(inputFile, keyFile, outputFile);
+                break;
+        
+        }
 
-    decryptData("ciphertext.txt", "private.key", "decrypted.txt");
-
-    printf("Done!\n");
+    }
 
     return 0;
 }
 
-void decryptData(char *inputfile, char *keyfile, char *output){
+void decryptData(char const *inputfile, char const *keyfile, char const *output){
 
     //Import public key     
     mpz_t key_n;
@@ -119,7 +162,6 @@ void decryptData(char *inputfile, char *keyfile, char *output){
         i++;
 
         mpz_clears(temp_char, encrypted_var, NULL);
-
     }
 
     mpz_clears(key_exponent, key_n, NULL);
@@ -127,8 +169,7 @@ void decryptData(char *inputfile, char *keyfile, char *output){
     return;
 }
 
-
-void encryptData(char *inputfile, char *keyfile, char *output){
+void encryptData(char const *inputfile, char const *keyfile, char const *output){
 
     //Import public key     
     mpz_t key_n;
@@ -292,7 +333,8 @@ void keyGeneration(void){
     //Initialize the rand_state
     gmp_randstate_t state;
     gmp_randinit_default(state);
-
+    gmp_randseed_ui(state, rand());
+    
     //Start a while loop until we find the appropriate e
     while(1){
         
@@ -361,5 +403,6 @@ void keyGeneration(void){
     fclose(file_public);
     gmp_randclear(state);
     mpz_clears(p, q, e, d, lamda, n, temp, NULL);
+    
     return;
 }
