@@ -97,7 +97,7 @@ void saveToFile(char const *filename, int a, int b, int secret){
 
 	FILE *file = NULL;
 	
-	file = fopen(filename, "a+");
+	file = fopen(filename, "w+");
 	
 	//Check if name is correct
 	if(file == NULL){

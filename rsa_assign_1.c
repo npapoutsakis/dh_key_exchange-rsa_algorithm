@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     char const *inputFile;
     char const *keyFile;
     char const *outputFile; 
-        
+    
     int option_val = 0;
     while((option_val = getopt(argc, argv, "i:o:k:gdeh")) != -1){
         
@@ -295,7 +295,7 @@ void keyGeneration(void){
     //At first, choose a prime randomly
     //Random int generator 
     srand(time(NULL));
-    unsigned long int r = rand() % rand_max;
+    unsigned long int r = rand();
 
     //r is a random number, we ll use mpz_nextprime to find a prime
     mpz_t temp;
@@ -403,6 +403,5 @@ void keyGeneration(void){
     fclose(file_public);
     gmp_randclear(state);
     mpz_clears(p, q, e, d, lamda, n, temp, NULL);
-    
     return;
 }
