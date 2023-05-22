@@ -1,12 +1,6 @@
+#     DH Key Exchange, RSA algorithm
+
 gcc (Ubuntu 11.3.0-1ubuntu1~22.04) 11.3.0
-
-#            Systems and Security PLH519
-#           
-#       Topics: DH Key Exchange, RSA algorithm
-#
-#       Author: Nikolaos Papoutsakis 2019030206
-
-
 
 In this assignment we implimented two important algorithms
 
